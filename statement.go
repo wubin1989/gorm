@@ -106,7 +106,11 @@ func (stmt *Statement) QuoteTo(writer clause.Writer, field interface{}) {
 	case clause.Column:
 		if v.Table != "" {
 			if v.Table == clause.CurrentTable {
-				write(v.Raw, stmt.Table)
+				if stmt.TableExpr != nil {
+					stmt.TableExpr.Build(stmt)
+				} else {
+					write(v.Raw, stmt.Table)
+				}
 			} else {
 				write(v.Raw, v.Table)
 			}
