@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	. "gorm.io/gorm/utils/tests"
+	"github.com/wubin1989/gorm"
+	"github.com/wubin1989/gorm/clause"
+	. "github.com/wubin1989/gorm/utils/tests"
 )
 
 func TestScannerValuer(t *testing.T) {

@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"strings"
 
-	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
-	"gorm.io/gorm/utils"
+	"github.com/wubin1989/gorm/clause"
+	"github.com/wubin1989/gorm/logger"
+	"github.com/wubin1989/gorm/schema"
+	"github.com/wubin1989/gorm/utils"
 )
 
 // Create inserts value, returning the inserted data's primary key in value's id
@@ -674,8 +674,10 @@ func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 	switch beginner := tx.Statement.ConnPool.(type) {
 	case TxBeginner:
 		tx.Statement.ConnPool, err = beginner.BeginTx(tx.Statement.Context, opt)
+		tx.callbacks.Begin().Execute(tx)
 	case ConnPoolBeginner:
 		tx.Statement.ConnPool, err = beginner.BeginTx(tx.Statement.Context, opt)
+		tx.callbacks.Begin().Execute(tx)
 	default:
 		err = ErrInvalidTransaction
 	}
@@ -691,6 +693,7 @@ func (db *DB) Begin(opts ...*sql.TxOptions) *DB {
 func (db *DB) Commit() *DB {
 	if committer, ok := db.Statement.ConnPool.(TxCommitter); ok && committer != nil && !reflect.ValueOf(committer).IsNil() {
 		db.AddError(committer.Commit())
+		db.callbacks.Commit().Execute(db)
 	} else {
 		db.AddError(ErrInvalidTransaction)
 	}
@@ -702,6 +705,7 @@ func (db *DB) Rollback() *DB {
 	if committer, ok := db.Statement.ConnPool.(TxCommitter); ok && committer != nil {
 		if !reflect.ValueOf(committer).IsNil() {
 			db.AddError(committer.Rollback())
+			db.callbacks.Rollback().Execute(db)
 		}
 	} else {
 		db.AddError(ErrInvalidTransaction)

@@ -3,7 +3,7 @@ package tests_test
 import (
 	"testing"
 
-	. "gorm.io/gorm/utils/tests"
+	. "github.com/wubin1989/gorm/utils/tests"
 )
 
 func TestExceptionsWithInvalidSql(t *testing.T) {

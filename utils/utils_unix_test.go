@@ -13,7 +13,7 @@ func TestSourceDir(t *testing.T) {
 		want string
 	}{
 		{
-			file: "/Users/name/go/pkg/mod/gorm.io/gorm@v1.2.3/utils/utils.go",
+			file: "/Users/name/go/pkg/mod/github.com/wubin1989/gorm@v1.2.3/utils/utils.go",
 			want: "/Users/name/go/pkg/mod/gorm.io/",
 		},
 		{
@@ -25,8 +25,8 @@ func TestSourceDir(t *testing.T) {
 			want: "/go/work/proj/gorm_alias/",
 		},
 		{
-			file: "/go/work/proj/my.gorm.io/gorm@v1.2.3/utils/utils.go",
-			want: "/go/work/proj/my.gorm.io/gorm@v1.2.3/",
+			file: "/go/work/proj/my.github.com/wubin1989/gorm@v1.2.3/utils/utils.go",
+			want: "/go/work/proj/my.github.com/wubin1989/gorm@v1.2.3/",
 		},
 	}
 	for _, c := range cases {

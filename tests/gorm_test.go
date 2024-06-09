@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/driver/mysql"
 
-	"gorm.io/gorm"
+	"github.com/wubin1989/gorm"
 )
 
 func TestOpen(t *testing.T) {

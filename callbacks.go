@@ -2,25 +2,29 @@ package gorm
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
 	"sort"
 	"time"
 
-	"gorm.io/gorm/schema"
-	"gorm.io/gorm/utils"
+	"github.com/wubin1989/gorm/schema"
+	"github.com/wubin1989/gorm/utils"
 )
 
 func initializeCallbacks(db *DB) *callbacks {
 	return &callbacks{
 		processors: map[string]*processor{
-			"create": {db: db},
-			"query":  {db: db},
-			"update": {db: db},
-			"delete": {db: db},
-			"row":    {db: db},
-			"raw":    {db: db},
+			"create":   {db: db},
+			"query":    {db: db},
+			"update":   {db: db},
+			"delete":   {db: db},
+			"row":      {db: db},
+			"raw":      {db: db},
+			"begin":    {db: db},
+			"rollback": {db: db},
+			"commit":   {db: db},
 		},
 	}
 }
@@ -70,6 +74,55 @@ func (cs *callbacks) Row() *processor {
 
 func (cs *callbacks) Raw() *processor {
 	return cs.processors["raw"]
+}
+
+func (cs *callbacks) Begin() *processor {
+	return cs.processors["begin"]
+}
+
+func (cs *callbacks) Rollback() *processor {
+	return cs.processors["rollback"]
+}
+
+func (cs *callbacks) Commit() *processor {
+	return cs.processors["commit"]
+}
+
+func (p *processor) Begin(tx *DB, opt *sql.TxOptions) *DB {
+	// call scopes
+	for len(tx.Statement.scopes) > 0 {
+		scopes := tx.Statement.scopes
+		tx.Statement.scopes = nil
+		for _, scope := range scopes {
+			tx = scope(tx)
+		}
+	}
+
+	tx.InstanceSet("gorm:transaction_options", opt)
+
+	for _, f := range p.fns {
+		f(tx)
+	}
+
+	return tx
+}
+
+func (p *processor) Commit(tx *DB) *DB {
+	if committer, ok := tx.Statement.ConnPool.(TxCommitter); ok && committer != nil && !reflect.ValueOf(committer).IsNil() {
+		tx.AddError(committer.Commit())
+	} else {
+		tx.AddError(ErrInvalidTransaction)
+	}
+	return tx
+}
+
+func (p *processor) Rollback(tx *DB) *DB {
+	if committer, ok := tx.Statement.ConnPool.(TxCommitter); ok && committer != nil && !reflect.ValueOf(committer).IsNil() {
+		tx.AddError(committer.Rollback())
+	} else {
+		tx.AddError(ErrInvalidTransaction)
+	}
+	return tx
 }
 
 func (p *processor) Execute(db *DB) *DB {

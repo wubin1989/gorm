@@ -16,5 +16,5 @@ linters-settings:
   whitespace:
     multi-func: true
   goimports:
-    local-prefixes: gorm.io/gorm
+    local-prefixes: github.com/wubin1989/gorm
 

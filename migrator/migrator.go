@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
+	"github.com/wubin1989/gorm"
+	"github.com/wubin1989/gorm/clause"
+	"github.com/wubin1989/gorm/logger"
+	"github.com/wubin1989/gorm/schema"
 )
 
 // This regular expression seeks to find a sequence of digits (\d+) among zero or more non-digit characters (\D*),

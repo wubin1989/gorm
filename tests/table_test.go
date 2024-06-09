@@ -5,11 +5,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/wubin1989/gorm"
+	"github.com/wubin1989/gorm/schema"
+	"github.com/wubin1989/gorm/utils/tests"
+	. "github.com/wubin1989/gorm/utils/tests"
 	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
-	"gorm.io/gorm/utils/tests"
-	. "gorm.io/gorm/utils/tests"
 )
 
 type UserWithTable struct {
