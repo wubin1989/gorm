@@ -559,6 +559,11 @@ func TestNot(t *testing.T) {
 	if !regexp.MustCompile("SELECT \\* FROM .*users.* WHERE NOT \\(manager IS NULL AND age >= .+\\) AND .users.\\..deleted_at. IS NULL").MatchString(result.Statement.SQL.String()) {
 		t.Fatalf("Build NOT condition, but got %v", result.Statement.SQL.String())
 	}
+
+	result = dryDB.Not(DB.Where("manager IS NULL").Or("age >= ?", 20)).Find(&User{})
+	if !regexp.MustCompile(`SELECT \* FROM .*users.* WHERE NOT \(manager IS NULL OR age >= .+\) AND .users.\..deleted_at. IS NULL`).MatchString(result.Statement.SQL.String()) {
+		t.Fatalf("Build NOT condition, but got %v", result.Statement.SQL.String())
+	}
 }
 
 func TestNotWithAllFields(t *testing.T) {
@@ -1332,7 +1337,7 @@ func TestQueryResetNullValue(t *testing.T) {
 		Number1 int64      `gorm:"default:NULL"`
 		Number2 uint64     `gorm:"default:NULL"`
 		Number3 float64    `gorm:"default:NULL"`
-		Now     *time.Time `gorm:"defalut:NULL"`
+		Now     *time.Time `gorm:"default:NULL"`
 		Item1Id string
 		Item1   *QueryResetItem `gorm:"references:ID"`
 		Item2Id string
@@ -1422,7 +1427,7 @@ func TestQueryScanToArray(t *testing.T) {
 		t.Fatal(err)
 	}
 	if users[0] == nil || users[0].Name != "testname1" {
-		t.Error("users[0] not covere")
+		t.Error("users[0] not covered")
 	}
 	if users[1] != nil {
 		t.Error("users[1] should be empty")

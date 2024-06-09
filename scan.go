@@ -244,7 +244,7 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 								rel = rel.FieldSchema.Relationships.Relations[name]
 								relFields = append(relFields, rel.Field)
 							}
-							// lastest name is raw dbname
+							// latest name is raw dbname
 							dbName := names[subNameCount-1]
 							if field := rel.FieldSchema.LookUpField(dbName); field != nil && field.Readable {
 								fields[idx] = field
@@ -257,9 +257,11 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 								continue
 							}
 						}
-						values[idx] = &sql.RawBytes{}
+						var val interface{}
+						values[idx] = &val
 					} else {
-						values[idx] = &sql.RawBytes{}
+						var val interface{}
+						values[idx] = &val
 					}
 				}
 			}
