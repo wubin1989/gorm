@@ -2,7 +2,6 @@ package gorm
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
@@ -86,43 +85,6 @@ func (cs *callbacks) Rollback() *processor {
 
 func (cs *callbacks) Commit() *processor {
 	return cs.processors["commit"]
-}
-
-func (p *processor) Begin(tx *DB, opt *sql.TxOptions) *DB {
-	// call scopes
-	for len(tx.Statement.scopes) > 0 {
-		scopes := tx.Statement.scopes
-		tx.Statement.scopes = nil
-		for _, scope := range scopes {
-			tx = scope(tx)
-		}
-	}
-
-	tx.InstanceSet("gorm:transaction_options", opt)
-
-	for _, f := range p.fns {
-		f(tx)
-	}
-
-	return tx
-}
-
-func (p *processor) Commit(tx *DB) *DB {
-	if committer, ok := tx.Statement.ConnPool.(TxCommitter); ok && committer != nil && !reflect.ValueOf(committer).IsNil() {
-		tx.AddError(committer.Commit())
-	} else {
-		tx.AddError(ErrInvalidTransaction)
-	}
-	return tx
-}
-
-func (p *processor) Rollback(tx *DB) *DB {
-	if committer, ok := tx.Statement.ConnPool.(TxCommitter); ok && committer != nil && !reflect.ValueOf(committer).IsNil() {
-		tx.AddError(committer.Rollback())
-	} else {
-		tx.AddError(ErrInvalidTransaction)
-	}
-	return tx
 }
 
 func (p *processor) Execute(db *DB) *DB {
