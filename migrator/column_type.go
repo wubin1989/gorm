@@ -93,7 +93,10 @@ func (ct ColumnType) ScanType() reflect.Type {
 	if ct.ScanTypeValue != nil {
 		return ct.ScanTypeValue
 	}
-	return ct.SQLColumnType.ScanType()
+	if ct.SQLColumnType != nil {
+		return ct.SQLColumnType.ScanType()
+	}
+	return nil
 }
 
 // Comment returns the comment of current column.
