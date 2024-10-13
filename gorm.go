@@ -50,6 +50,8 @@ type Config struct {
 	CreateBatchSize int
 	// TranslateError enabling error translation
 	TranslateError bool
+	// PropagateUnscoped propagate Unscoped to every other nested statement
+	PropagateUnscoped bool
 
 	// ClauseBuilders clause builder
 	ClauseBuilders map[string]clause.ClauseBuilder
@@ -110,6 +112,7 @@ type Session struct {
 	DisableNestedTransaction bool
 	AllowGlobalUpdate        bool
 	FullSaveAssociations     bool
+	PropagateUnscoped        bool
 	QueryFields              bool
 	Context                  context.Context
 	Logger                   logger.Interface
@@ -186,6 +189,12 @@ func Open(dialector Dialector, opts ...Option) (db *DB, err error) {
 				_ = db.Close()
 			}
 		}
+
+		if config.TranslateError {
+			if _, ok := db.Dialector.(ErrorTranslator); !ok {
+				config.Logger.Warn(context.Background(), "The TranslateError option is enabled, but the Dialector %s does not implement ErrorTranslator.", db.Dialector.Name())
+			}
+		}
 	}
 
 	if config.PrepareStmt {
@@ -239,6 +248,10 @@ func (db *DB) Session(config *Session) *DB {
 
 	if config.FullSaveAssociations {
 		txConfig.FullSaveAssociations = true
+	}
+
+	if config.PropagateUnscoped {
+		txConfig.PropagateUnscoped = true
 	}
 
 	if config.Context != nil || config.PrepareStmt || config.SkipHooks {
@@ -408,6 +421,9 @@ func (db *DB) getInstance() *DB {
 				Clauses:   map[string]clause.Clause{},
 				Vars:      make([]interface{}, 0, 8),
 				SkipHooks: db.Statement.SkipHooks,
+			}
+			if db.Config.PropagateUnscoped {
+				tx.Statement.Unscoped = db.Statement.Unscoped
 			}
 		} else {
 			// with clone statement
