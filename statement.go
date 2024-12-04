@@ -84,6 +84,9 @@ func (stmt *Statement) QuoteTo(writer clause.Writer, field interface{}) {
 		if raw {
 			writer.WriteString(str)
 		} else {
+			if stmt.DB.Dialector.Name() == "postgres" {
+				str = strings.ToLower(str)
+			}
 			stmt.DB.Dialector.QuoteTo(writer, str)
 		}
 	}
